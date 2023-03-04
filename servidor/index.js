@@ -1,62 +1,67 @@
-const express = require('express')
-const app = express()
-const port = 3000
+const express = require('express');
+const app = express();
+const port = 3000;
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-app.use(express.static('public2'))
+app.use(express.static('public'));
 
-var usuariosConectados = 0;
-// app.get('/', (req, res) => {
-//   res.send('<h1>Segunda prueba con NodeJS</h1>')
-// })
+// variable de la sala
+var sala = [];
+// variable de los usuarios conectados a la sala
+var usuariosConectados = 1;
+// variable de los usuarios
+var usuarios = [];
 
 io.on('connection', (socket) => {
-    socket.nombre="";
-    usuariosConectados ++;
-    console.log('Usuario conectado, hay un total de ' + usuariosConectados + ' usuarios conectados');
 
-    // recibe el nombre del usuario
-    socket.on('nombre', function(nombre) {
-        console.log('Usuario: ' + nombre);
-        datoNombre = {
-          nuevoNombre:nombre,
-          antiguoNombre:socket.nombre
-        };
+  // funcion para dcuando se desconecta un usuario
+  socket.on('disconnect', () => {
 
-        socket.nombre = nombre;
+    usuariosConectados--;
+    var userIndex = usuarios.indexOf(socket.username);
+    sala.splice(userIndex, 1);
+    io.to(socket.room).emit('userHasDisconnected', socket.username);
+    io.to(socket.room).emit('usersConnected', sala);
+    io.to(socket.room).emit('numUsersConnected', usuariosConectados);
+    
+  });
 
-        io.emit('nuevoUsuarioServidor', datoNombre);
-        io.emit('alerta', false);
-        // socket.broadcast.emit('nuevoUsuarioServidor', nombre);
+  // funcion para cuando se conecta un usuario o se cambia el nombre
+  socket.on('setUsername', (userData)=>{
+    socket.username = userData.username;
 
-    });
+    datoNombre = {nuevoNombre: userData.username, antiguoNombre: socket.username};
 
-    // muestra cuando se desconecta un usuario
-    socket.on('disconnect', () => {
-        usuariosConectados --;
-        console.log(`Usuario ${socket.nombre} desconectado, hay un total de ` + usuariosConectados + ' usuarios conectados');
-        // io.on.emit('numUsuarios', usuariosConectados);
-    });
+    socket.username = userData.username;
+    socket.room = userData.room;
 
-    // recibe el mensaje del usuario
-    socket.on('mensajeChat', function(mensaje) {
-      if(socket.nombre==""){
-        io.emit('alerta', true);
-      }
-      else{
-        io.emit('alerta', false);
-        datosMensaje = {
-          mensaje:mensaje,
-          nombre:socket.nombre
-        };
-        io.emit('mensajeServidor', datosMensaje);
-      }
-    });
+    socket.join(userData.room);
 
+
+    usuariosConectados++;
+    sala.push({userID: socket.id, username: socket.username, userImg: userData.userImg})
+    io.to(socket.room).emit('userHasConnected', socket.username);
+    io.to(socket.room).emit('usersConnected', sala);
+    io.to(socket.room).emit('numUsersConnected', usuariosConectados);
+    
+  })
+
+  // funcion para cuando se envia un mensaje
+  socket.on('message', (msg)=>{
+    datosMsg = {username: socket.username, clientID: socket.clientID, serverID: socket.id, msg: msg.msg, time: msg.time}
+    io.to(socket.room).emit('message', datosMsg);
+  });
+
+  // funcion para cuando se esta escribiendo
+  socket.on("userTyping", (data)=>{
+    io.emit('userTyping', {userID: socket.id, isTyping: data.isTyping});
+  })
 });
+
+
 
 server.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
