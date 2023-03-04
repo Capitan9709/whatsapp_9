@@ -40,7 +40,6 @@ io.on('connection', (socket) => {
 
     socket.join(userData.room);
 
-
     usuariosConectados++;
     sala.push({userID: socket.id, username: socket.username, userImg: userData.userImg})
     io.to(socket.room).emit('userHasConnected', socket.username);
@@ -60,7 +59,6 @@ io.on('connection', (socket) => {
     io.emit('userTyping', {userID: socket.id, isTyping: data.isTyping});
   })
 });
-
 
 
 server.listen(port, () => {
