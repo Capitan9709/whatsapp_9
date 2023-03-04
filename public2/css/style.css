@@ -1,0 +1,65 @@
+/* $blanco: rgb(228, 228, 228); */
+/* $violeta: rgb(135, 68, 202); */
+
+.fa-whatsapp{
+    color: rgb(135, 68, 202);
+}
+.fa-paper-plane{
+    color: white;
+    scale: 1.5;
+    transition: 0.3s;
+}
+.fa-paper-plane:hover{
+    color: rgb(135, 68, 202);
+    scale: 1.5;
+    transition: 0.3s;
+}
+#boton{
+    border: 0px;
+    box-shadow: 3px 3px 5px rgb(135, 68, 202);
+    border-radius: 5px;
+    transition: 0.3s;
+}
+#boton:hover{
+    background-color: rgb(135, 68, 202) !important;
+    color: black !important;
+    transition: 0.3s;
+}
+#divChat h3{
+    margin-left: 1rem;
+}
+#divChat{
+    border-left: 1px solid rgb(228, 228, 228);
+}
+#divChat #chat{
+    height: 50vh;
+    /* overflow-y: scroll; */
+}
+#chat div{
+    box-shadow: 3px 2px 7px rgb(135, 68, 202);
+    margin-left: 0.75rem;
+    margin-top: 0.75rem;
+    padding-left: 0.50rem;
+    border-radius: 5px;
+    width: 20%;
+    white-space: break-word;
+}
+#chat div p{
+    padding: 0px;
+}
+.fa-user{
+    margin-right: 0.25rem;
+}
+ul li{
+    margin-top: 1rem;
+    padding-left: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    margin-right: 2rem;
+    list-style: none;
+    /* border: 1px solid rgb(228, 228, 228); */
+    border-radius: 5px;
+    font-size: larger;
+    /* box-shadow: 3px 2px 7px rgb(228, 228, 228); */
+    box-shadow: 2px 2px 7px rgb(135, 68, 202);
+}

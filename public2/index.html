@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whatsapp 9</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/b796c7785a.js" crossorigin="anonymous"></script>
+</head>
+<body class="text-bg-dark">
+    <div class="mx-3">
+        <div class="d-flex mt-2">
+            <i class="fa-brands fa-whatsapp fa-3x me-3"></i>
+            <h1>Whatsapp 9</h1>
+        </div>
+        <span id="alerta"></span>
+        <form id="form" action="">
+            <input type="text" id="nombre">
+            <input type="submit" id="boton" class="text-bg-dark" value="Iniciar Sesion">
+        </form>
+    </div>
+
+    <div class="d-flex col-10 mx-3 mt-4">
+        <div class="col-3">
+            <h3>Usuarios Conectados <span id="numUsuarios">0</span></h3>
+            <ul id="usuarios" class="ms-3"></ul>
+        </div>
+
+        <div class="col-9 ms-3" id="divChat">
+            <h3>Chat</h3>
+            <div id="chat" class="mx-3"></div>
+            <form id="formChat" action="">
+                <input class="col-10 mx-3 my-2" type="text" id="mensajeChat">
+                <button type="submit" id="botonChat" class="bg-dark border border-dark"><i class="fa-solid fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+        var listaUsuarios =[];
+        var usuariosConectados = 0;
+
+        var nombre = document.getElementById('nombre');
+        var form = document.getElementById('form');
+
+        var formChat = document.getElementById('formChat');
+        var mensajeChat = document.getElementById('mensajeChat');
+
+        // enviar mensaje chat
+        formChat.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (mensajeChat.value) {
+            socket.emit('mensajeChat', mensajeChat.value);
+            mensajeChat.value = '';
+            }
+        });
+
+        // enviar nombre usuario
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (nombre.value) {
+            socket.emit('nombre', nombre.value);
+            nombre.value = '';
+            }
+        });
+
+        // actualizar vista usuarios conectados
+        function actualizarVista(lista){
+            document.getElementById('usuarios').innerHTML = '';
+            for (let i = 0; i < lista.length; i++) {
+                var li = document.createElement('li');
+                li.innerHTML = '<i class="fa-solid fa-user"></i>' + lista[i];
+                document.getElementById('usuarios').appendChild(li);
+            }
+            usuariosConectados = lista.length;
+            document.getElementById('numUsuarios').textContent = usuariosConectados;
+        }
+        
+        // contar numero usuarios conectados
+        socket.on('numUsuarios', (numusu) => {
+            document.getElementById('numUsuarios').textContent = numusu;
+        });
+
+        // cargar nombres usuarios
+        socket.on('nuevoUsuarioServidor',(datos) =>{
+
+            if(!listaUsuarios.includes(datos.antiguoNombre)){
+                listaUsuarios.push(datos.nuevoNombre);
+                console.log("Se ha conectado un nuevo usuario: "+datos.nuevoNombre);
+            }
+            else{
+                posicion = listaUsuarios.indexOf(datos.antiguoNombre);
+                listaUsuarios[posicion] = datos.nuevoNombre;
+                console.log("Se ha reemplazado el nombre de "+datos.antiguoNombre+" por "+datos.nuevoNombre);
+            }
+
+            actualizarVista(listaUsuarios);
+        });
+        
+        // mostrar alerta si no se ha iniciado sesion
+        socket.on('alerta', (estado)=>{
+            alert = document.getElementById('alerta');
+            if(estado == true){
+                alert.innerHTML = '<div class="d-flex justify-content-center alert alert-warning" role="alert">Debes iniciar sesion previamente</div>';
+            }
+            else{
+                alert.innerHTML = '';
+            }
+        });
+
+        // recibir mensaje chat
+        socket.on('mensajeServidor', (datos) => {
+            var div = document.createElement('div');
+            div.innerHTML = '<strong>' + datos.nombre + '</strong><br/> <p>' + datos.mensaje + '</p>';
+            document.getElementById('chat').appendChild(div);
+        });
+
+    </script>
+    
+</body>
+</html>
