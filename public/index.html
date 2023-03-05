@@ -46,7 +46,9 @@
     <script src="https://neon-whatsapp.onrender.com/socket.io/socket.io.js"></script>
 
     <script>        
-        var socket = io();
+        var socket = io("https://neon-whatsapp.onrender.com", {
+            path: "/socket.io",
+        });
         
         var userForm = $(".userForm");
         var form = document.getElementById('form');
